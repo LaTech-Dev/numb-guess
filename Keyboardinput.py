@@ -9,7 +9,7 @@ def get_data(user_text, slider_value):
         time.sleep(slider_value)
 
 # Keyboard input: st.text_area allows multi-line input
-user_input = st.text_area("Type your message here (Press Enter for new lines):", "Hello!\nThis is a test.")
+user_input = st.text_area("Type your message here (Press Enter for new lines):", " ")
 
 slider_value = st.slider("Typing Speed", 0.0, 0.2, value=0.05, step=0.01)
 
