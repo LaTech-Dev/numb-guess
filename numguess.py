@@ -1,7 +1,7 @@
 import streamlit as st
 import random
 
-st.set_page_config(page_title="Guess the Number", page_icon="🎯")
+st.set_page_config(page_title="Guess a Number", page_icon="🎯")
 
 st.title("🎯 Guess the Number")
 
