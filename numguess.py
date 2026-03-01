@@ -88,7 +88,9 @@ with input_container:
             f"Guess a number between {min_guess} and {max_guess}",
             key="guess_input",
             on_change=handle_guess,
+            autocomplete="off"
         )
+    
 
 
 # -----------------------
