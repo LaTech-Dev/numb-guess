@@ -16,11 +16,8 @@ wind_direction = 0
 coord_lat = 0
 coord_long = 0
 forcast_time = 0
-
-#API_KEY = "3aee7873828cf0017c7f865836a4dd49"
 CITY = "Addicks"
 url = f"https://wttr.in/{CITY}?format=j1"
-#url = f"https://api.openweathermap.org/data/2.5/weather?q={CITY}&appid={API_KEY}&units=imperial"
 
 response = requests.get(url)
 data = response.json()
