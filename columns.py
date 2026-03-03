@@ -53,9 +53,7 @@ col1, col2, col3, col4 = before_call()
 # OPENWEATHER CONFIG
 # -------------------------------
 CITY = "Addicks"
-#API_KEY = st.secrets["OPENWEATHER_KEY"]
-API_KEY = "3aee7873828cf0017c7f865836a4dd49"
-
+API_KEY = st.secrets["OPENWEATHER_KEY"]
 url = (
     f"https://api.openweathermap.org/data/2.5/weather"
     f"?q={CITY}&appid={API_KEY}&units=imperial"
