@@ -79,7 +79,7 @@ try:
     api_dt = data["dt"]
     timezone_offset = data["timezone"]
 
-    utc_time = datetime.fromtimestamp(api_dt, tz=timezone.utc)
+    utc_time = datetime.fromtimestamp(api_dt)
     local_time = utc_time + timedelta(seconds=timezone_offset)
     st.write(f"Local Time: {local_time.strftime('%Y-%m-%d %I:%M:%S %p')}")
     #st.write(f"Local Time: {local_time.strftime('%Y-%m-%d %I:%M:%S %p')}")%M:%S %p')}")
