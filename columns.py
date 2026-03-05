@@ -2,6 +2,7 @@ import streamlit as st
 import time
 import requests
 from datetime import datetime, timezone, timedelta
+from zoneinfo import ZoneInfo
 
 st.set_page_config(layout="wide")
 
@@ -71,11 +72,10 @@ def get_weather(city, api_key):
 # -------------------------------
 def parse_weather(data):
 
-    api_dt = data["dt"]
-    tz_offset = data["timezone"]
+    from zoneinfo import ZoneInfo
 
-    utc_time = datetime.fromtimestamp(api_dt, tz=timezone.utc)
-    local_time = utc_time + timedelta(seconds=tz_offset)
+    utc_time = datetime.fromtimestamp(data["dt"], tz=ZoneInfo("UTC"))
+    local_time = utc_time.astimezone(ZoneInfo("America/Chicago"))
 
     return {
         "time": local_time.strftime("%Y-%m-%d %I:%M:%S %p"),
