@@ -1,7 +1,8 @@
 import streamlit as st
 import time
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
+#import pytz
 
 st.set_page_config(layout="wide")
 
@@ -14,19 +15,20 @@ x = datetime.now()
 # WEATHER DEFAULTS
 # -------------------------------
 temp = 0
-cloudcover = 0
+cloud_cover = 0
 humidity = 0
 wind_speed = 0
 wind_dir = 0
 latitude = 0
 longitude = 0
 wtime = "N/A"
+mst_time = "N/A"
 
 # -------------------------------
 # HEADER / COLUMNS
 # -------------------------------
 def before_call():
-    col1, col2, col3, col4 = st.columns([1,1,1,1])
+    col1, col2, col3, col4 = st.columns([3,3,3,3])
 
     col1.markdown("# This is a Header")
     col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
@@ -53,7 +55,9 @@ col1, col2, col3, col4 = before_call()
 # OPENWEATHER CONFIG
 # -------------------------------
 CITY = "Addicks"
+#API_KEY = st.secrets["OPENWEATHER_KEY"]
 API_KEY = st.secrets["OPENWEATHER_KEY"]
+
 url = (
     f"https://api.openweathermap.org/data/2.5/weather"
     f"?q={CITY}&appid={API_KEY}&units=imperial"
@@ -69,8 +73,19 @@ try:
 
     # Extract OpenWeather fields
     wtime = datetime.fromtimestamp(data["dt"]).strftime("%Y-%m-%d %H:%M:%S")
+
+    # Assuming API returns Unix timestamp 'dt'
+    #api_dt = 1667656987
+    api_dt = data["dt"]
+    timezone_offset = data["timezone"]
+    local_time = datetime.fromtimestamp(api_dt + timezone_offset, tz=timezone.utc)
+    st.write(f"Local Time: {local_time.strftime('%Y-%m-%d %I:%M:%S %p')}")
+    # Convert directly using pytz
+    #cst_zone = pytz.timezone('US/Central')
+    #cst_time = datetime.fromtimestamp(api_dt, tz=cst_zone)
+    #st.write(f"CST Time: {cst_time.strftime('%Y-%m-%d %I:%M:%S %p')}")
     temp = data["main"]["temp"]
-    cloudcover = data["clouds"]["all"]
+    cloud_cover = data["clouds"]["all"]
     humidity = data["main"]["humidity"]
     wind_speed = data["wind"]["speed"]
     wind_dir = data["wind"].get("deg", "N/A")
@@ -85,6 +100,7 @@ except Exception as e:
 # SESSION STATE
 # -------------------------------
 if "photo" not in st.session_state:
+#    st.session_state["photo"] = "not done"
     st.session_state["photo"] = "not done"
 
 
@@ -95,9 +111,9 @@ def change_photo_state():
 # -------------------------------
 # PHOTO INPUT
 # -------------------------------
-uploaded_photo = col2.file_uploader("Upload a photo", on_change=change_photo_state)
-camera_photo = col2.camera_input("Take a photo", on_change=change_photo_state)
-
+#uploaded_photo = col2.file_uploader("Upload a photo", on_change=change_photo_state)
+#camera_photo = col2.camera_input("Take a photo", on_change=change_photo_state)
+change_photo_state()
 # -------------------------------
 # AFTER PHOTO UPLOAD
 # -------------------------------
@@ -106,15 +122,16 @@ if st.session_state["photo"] == "done":
     progress_bar = col2.progress(0)
 
     for perc_completed in range(100):
-        time.sleep(0.005)
+        time.sleep(0.0005)
         progress_bar.progress(perc_completed + 1)
 
     col2.success("Photo uploaded successfully!")
 
     col3.text("Weather Data From openweathermap.org")
     col3.metric(label=f"Weather Time in {CITY}", value=wtime)
+    #col3.metric(label=f"Weather Time in {CITY}", value=cst_time)
     col3.metric(label="Temperature is", value=f"{temp} °F")
-    col3.metric(label="Cloud Cover is", value=f"{cloudcover} %")
+    col3.metric(label="Cloud Cover is", value=f"{cloud_cover} %")
     col3.metric(label="Humidity is", value=f"{humidity} %")
     col3.metric(label="Wind Speed is", value=f"{wind_speed} MPH")
     col3.metric(label="Wind Direction is", value=f"{wind_dir} °")
@@ -126,14 +143,13 @@ if st.session_state["photo"] == "done":
 
     col3.markdown(md3)
 
-    col4.markdown("this is the fourth column")
+    col4.markdown("this is the fourth column 12345 67890 12345 67890 12345 67890 12345 67890")
     col4.markdown(md4)
 
     with st.expander("Click to read more"):
         st.write("Hello! Here are more details on this topic that you were interested in.")
 
-        if uploaded_photo is None:
-            if camera_photo:
-                st.image(camera_photo)
-        else:
-            st.image(uploaded_photo)
+    #        if camera_photo:
+    #            st.image(camera_photo)
+    #    else:
+    #        st.image(uploaded_photo)
