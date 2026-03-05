@@ -2,7 +2,6 @@ import streamlit as st
 import time
 import requests
 from datetime import datetime, timezone, timedelta
-#import pytz
 
 st.set_page_config(layout="wide")
 
@@ -22,7 +21,6 @@ wind_dir = 0
 latitude = 0
 longitude = 0
 wtime = "N/A"
-mst_time = "N/A"
 
 # -------------------------------
 # HEADER / COLUMNS
@@ -41,6 +39,7 @@ def before_call():
     col1.markdown("You can even add a horizontal rule below \n\n---")
     col1.markdown(":red[latest streamlit method below and it should be used]")
     col1.divider()
+
     col1.markdown(":red[This text is red!]")
     col1.markdown(":yellow[This text is yellow!]")
     col1.markdown(":green[This text is green!]")
@@ -52,58 +51,66 @@ def before_call():
 col1, col2, col3, col4 = before_call()
 
 # -------------------------------
+# WEATHER FUNCTION (CACHED)
+# -------------------------------
+@st.cache_data(ttl=300)
+def get_weather(city, api_key):
+
+    url = (
+        "https://api.openweathermap.org/data/2.5/weather"
+        f"?q={city}&appid={api_key}&units=imperial"
+    )
+
+    r = requests.get(url, timeout=5)
+    r.raise_for_status()
+    return r.json()
+
+
+# -------------------------------
+# WEATHER PARSER
+# -------------------------------
+def parse_weather(data):
+
+    api_dt = data["dt"]
+    tz_offset = data["timezone"]
+
+    utc_time = datetime.fromtimestamp(api_dt, tz=timezone.utc)
+    local_time = utc_time + timedelta(seconds=tz_offset)
+
+    return {
+        "time": local_time.strftime("%Y-%m-%d %I:%M:%S %p"),
+        "temp": data["main"]["temp"],
+        "clouds": data["clouds"]["all"],
+        "humidity": data["main"]["humidity"],
+        "wind_speed": data["wind"]["speed"],
+        "wind_dir": data["wind"].get("deg", "N/A"),
+        "lat": data["coord"]["lat"],
+        "lon": data["coord"]["lon"],
+    }
+
+
+# -------------------------------
 # OPENWEATHER CONFIG
 # -------------------------------
 CITY = "Addicks"
-#API_KEY = st.secrets["OPENWEATHER_KEY"]
 API_KEY = st.secrets["OPENWEATHER_KEY"]
-
-url = (
-    f"https://api.openweathermap.org/data/2.5/weather"
-    f"?q={CITY}&appid={API_KEY}&units=imperial"
-)
 
 # -------------------------------
 # FETCH WEATHER
 # -------------------------------
 try:
-    response = requests.get(url, timeout=5)
-    response.raise_for_status()
-    data = response.json()
-
-    # Extract OpenWeather fields
-    wtime = datetime.fromtimestamp(data["dt"]).strftime("%Y-%m-%d %H:%M:%S")
-
-    # Assuming API returns Unix timestamp 'dt'
-    #api_dt = 1667656987
-    api_dt = data["dt"]
-    timezone_offset = data["timezone"]
-
-    utc_time = datetime.fromtimestamp(api_dt)
-    local_time = utc_time + timedelta(seconds=timezone_offset)
-    st.write(f"Local Time: {local_time.strftime('%Y-%m-%d %I:%M:%S %p')}")
-    #st.write(f"Local Time: {local_time.strftime('%Y-%m-%d %I:%M:%S %p')}")%M:%S %p')}")
-    # Convert directly using pytz
-    #cst_zone = pytz.timezone('US/Central')
-    #cst_time = datetime.fromtimestamp(api_dt, tz=cst_zone)
-    #st.write(f"CST Time: {cst_time.strftime('%Y-%m-%d %I:%M:%S %p')}")
-    temp = data["main"]["temp"]
-    cloud_cover = data["clouds"]["all"]
-    humidity = data["main"]["humidity"]
-    wind_speed = data["wind"]["speed"]
-    wind_dir = data["wind"].get("deg", "N/A")
-    latitude = data["coord"]["lat"]
-    longitude = data["coord"]["lon"]
+    raw_weather = get_weather(CITY, API_KEY)
+    weather = parse_weather(raw_weather)
 
 except Exception as e:
     st.warning(f"Weather service temporarily unavailable: {e}")
-    data = None
+    weather = None
+
 
 # -------------------------------
 # SESSION STATE
 # -------------------------------
 if "photo" not in st.session_state:
-#    st.session_state["photo"] = "not done"
     st.session_state["photo"] = "not done"
 
 
@@ -111,12 +118,9 @@ def change_photo_state():
     st.session_state["photo"] = "done"
 
 
-# -------------------------------
-# PHOTO INPUT
-# -------------------------------
-#uploaded_photo = col2.file_uploader("Upload a photo", on_change=change_photo_state)
-#camera_photo = col2.camera_input("Take a photo", on_change=change_photo_state)
+# simulate upload trigger
 change_photo_state()
+
 # -------------------------------
 # AFTER PHOTO UPLOAD
 # -------------------------------
@@ -130,29 +134,40 @@ if st.session_state["photo"] == "done":
 
     col2.success("Photo uploaded successfully!")
 
-    col3.text("Weather Data From openweathermap.org")
-    col3.metric(label=f"Weather Time in {CITY}", value=wtime)
-    #col3.metric(label=f"Weather Time in {CITY}", value=cst_time)
-    col3.metric(label="Temperature is", value=f"{temp} °F")
-    col3.metric(label="Cloud Cover is", value=f"{cloud_cover} %")
-    col3.metric(label="Humidity is", value=f"{humidity} %")
-    col3.metric(label="Wind Speed is", value=f"{wind_speed} MPH")
-    col3.metric(label="Wind Direction is", value=f"{wind_dir} °")
-    col3.metric(label="Latitude is", value=f"{latitude} °")
-    col3.metric(label="Longitude is", value=f"{longitude} °")
+    # -------------------------------
+    # WEATHER DISPLAY
+    # -------------------------------
+    if weather:
 
+        col3.text("Weather Data From openweathermap.org")
+
+        col3.metric(f"Weather Time in {CITY}", weather["time"])
+        col3.metric("Temperature", f'{weather["temp"]} °F')
+        col3.metric("Cloud Cover", f'{weather["clouds"]} %')
+        col3.metric("Humidity", f'{weather["humidity"]} %')
+        col3.metric("Wind Speed", f'{weather["wind_speed"]} MPH')
+        col3.metric("Wind Direction", f'{weather["wind_dir"]} °')
+        col3.metric("Latitude", weather["lat"])
+        col3.metric("Longitude", weather["lon"])
+
+    # -------------------------------
+    # TEXT INPUT
+    # -------------------------------
     md3 = st.text_area("Enter in Column 3! :balloon:")
     md4 = st.text_area("Enter in Column 4! :balloon:")
 
     col3.markdown(md3)
 
-    col4.markdown("this is the fourth column 12345 67890 12345 67890 12345 67890 12345 67890")
+    col4.markdown(
+        "this is the fourth column 12345 67890 12345 67890 "
+        "12345 67890 12345 67890"
+    )
     col4.markdown(md4)
 
+    # -------------------------------
+    # EXPANDER
+    # -------------------------------
     with st.expander("Click to read more"):
-        st.write("Hello! Here are more details on this topic that you were interested in.")
-
-    #        if camera_photo:
-    #            st.image(camera_photo)
-    #    else:
-    #        st.image(uploaded_photo)
+        st.write(
+            "Hello! Here are more details on this topic that you were interested in."
+        )
