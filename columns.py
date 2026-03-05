@@ -72,13 +72,11 @@ def get_weather(city, api_key):
 # -------------------------------
 def parse_weather(data):
 
-    from zoneinfo import ZoneInfo
-
-    utc_time = datetime.fromtimestamp(data["dt"], tz=ZoneInfo("UTC"))
-    local_time = utc_time.astimezone(ZoneInfo("America/Chicago"))
+    wtime = datetime.utcfromtimestamp(data["dt"] + data["timezone"])
+    wtime = wtime.strftime("%Y-%m-%d %I:%M:%S %p")
 
     return {
-        "time": local_time.strftime("%Y-%m-%d %I:%M:%S %p"),
+        "time": wtime,
         "temp": data["main"]["temp"],
         "clouds": data["clouds"]["all"],
         "humidity": data["main"]["humidity"],
