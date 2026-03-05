@@ -1,7 +1,7 @@
 import streamlit as st
 import time
 import requests
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 #import pytz
 
 st.set_page_config(layout="wide")
@@ -78,8 +78,11 @@ try:
     #api_dt = 1667656987
     api_dt = data["dt"]
     timezone_offset = data["timezone"]
-    local_time = datetime.fromtimestamp(api_dt + timezone_offset, tz=timezone.utc)
+
+    utc_time = datetime.fromtimestamp(api_dt, tz=timezone.utc)
+    local_time = utc_time + timedelta(seconds=timezone_offset)
     st.write(f"Local Time: {local_time.strftime('%Y-%m-%d %I:%M:%S %p')}")
+    #st.write(f"Local Time: {local_time.strftime('%Y-%m-%d %I:%M:%S %p')}")%M:%S %p')}")
     # Convert directly using pytz
     #cst_zone = pytz.timezone('US/Central')
     #cst_time = datetime.fromtimestamp(api_dt, tz=cst_zone)
