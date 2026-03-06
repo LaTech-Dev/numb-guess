@@ -3,14 +3,14 @@ import time
 import requests
 from datetime import datetime, timezone, timedelta
 #from datetime import datetime, timezone
-#from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo
 
 st.set_page_config(layout="wide")
 
 # -------------------------------
 # TIME
 # -------------------------------
-x = datetime.now()
+x = datetime.now(ZoneInfo("America/Chicago"))
 
 # -------------------------------
 # WEATHER DEFAULTS
