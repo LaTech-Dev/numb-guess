@@ -2,7 +2,8 @@ import streamlit as st
 import time
 import requests
 from datetime import datetime, timezone, timedelta
-from zoneinfo import ZoneInfo
+#from datetime import datetime, timezone
+#from zoneinfo import ZoneInfo
 
 st.set_page_config(layout="wide")
 
@@ -22,6 +23,7 @@ wind_dir = 0
 latitude = 0
 longitude = 0
 wtime = "N/A"
+weather: dict | None = None
 
 # -------------------------------
 # HEADER / COLUMNS
@@ -29,11 +31,12 @@ wtime = "N/A"
 def before_call():
     col1, col2, col3, col4 = st.columns([3,3,3,3])
 
-    col1.markdown("# This is a Header version 3/5")
+    col1.markdown("# This is a Header version 3/5.6:04")
     col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
     col1.markdown("---")
     col1.markdown("ISO format")
     col1.markdown(x.isoformat())
+    col1.markdown(x)
     col1.markdown(x.year)
     col1.markdown(x.strftime("%B %d,%Y"))
     col1.markdown(x.strftime("%H:%M:%S"))
@@ -71,8 +74,8 @@ def get_weather(city, api_key):
 # WEATHER PARSER
 # -------------------------------
 def parse_weather(data):
-
-    wtime = datetime.utcfromtimestamp(data["dt"] + data["timezone"])
+    wtime = datetime.fromtimestamp(data["dt"] + data["timezone"], tz=timezone.utc
+    )
     wtime = wtime.strftime("%Y-%m-%d %I:%M:%S %p")
 
     return {
@@ -135,10 +138,9 @@ if st.session_state["photo"] == "done":
     # -------------------------------
     # WEATHER DISPLAY
     # -------------------------------
-    if weather:
 
-        col3.text("Weather Data From openweathermap.org")
-
+    col3.text("Weather Data From openweathermap.org")
+    if weather is not None:
         col3.metric(f"Weather Time in {CITY}", weather["time"])
         col3.metric("Temperature", f'{weather["temp"]} °F')
         col3.metric("Cloud Cover", f'{weather["clouds"]} %')
