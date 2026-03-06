@@ -39,7 +39,7 @@ def before_call():
     col1.markdown(x)
     col1.markdown(x.year)
     col1.markdown(x.strftime("%B %d,%Y"))
-    col1.markdown(x.strftime("%H:%M:%S"))
+    col1.markdown(x.strftime("%I:%M:%S %p"))
     col1.markdown("You can even add a horizontal rule below \n\n---")
     col1.markdown(":red[latest streamlit method below and it should be used]")
     col1.divider()
