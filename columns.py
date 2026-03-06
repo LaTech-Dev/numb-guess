@@ -4,8 +4,12 @@ import requests
 from datetime import datetime, timezone, timedelta
 #from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
-
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="4 Column Page",  # This goes in the browser tab
+    page_icon="🌤️",                  # This is the "favicon" in the tab
+    layout="wide"                    # Optional: uses the full screen width
+)
+#st.set_page_config(layout="wide")
 
 # -------------------------------
 # TIME
@@ -31,7 +35,7 @@ weather: dict | None = None
 def before_call():
     col1, col2, col3, col4 = st.columns([3,3,3,3])
 
-    col1.markdown("# This is a Header version 3/5.9:08")
+    col1.markdown("#### This is a Header \nversion 3/5.22:00")
     col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
     col1.markdown("---")
     col1.markdown("ISO format")
@@ -141,14 +145,20 @@ if st.session_state["photo"] == "done":
 
     col3.text("Weather Data From openweathermap.org")
     if weather is not None:
-        col3.metric(f"Weather Time in {CITY}", weather["time"])
-        col3.metric("Temperature", f'{weather["temp"]} °F')
-        col3.metric("Cloud Cover", f'{weather["clouds"]} %')
-        col3.metric("Humidity", f'{weather["humidity"]} %')
-        col3.metric("Wind Speed", f'{weather["wind_speed"]} MPH')
-        col3.metric("Wind Direction", f'{weather["wind_dir"]} °')
-        col3.metric("Latitude", weather["lat"])
-        col3.metric("Longitude", weather["lon"])
+        col3.markdown(f"Weather Time in {CITY}")
+        col3.markdown(f"##### {weather['time']}")
+        col3.markdown(f"Temperature")
+        col3.markdown(f'##### {weather["temp"]} °F')
+        col3.markdown(f"Cloud Cover")
+        col3.markdown(f'##### {weather["clouds"]} °F')
+        col3.markdown(f"Wind Speed")
+        col3.markdown(f'##### {weather["wind_speed"]} MPH')
+        col3.markdown(f"Wind Direction")
+        col3.markdown(f'##### {weather["wind_dir"]} °')
+        col3.markdown(f"Latitude")
+        col3.markdown(f'##### {weather["lat"]}')
+        col3.markdown(f"Longitude")
+        col3.markdown(f'##### {weather["lon"]}')
 
     # -------------------------------
     # TEXT INPUT
