@@ -29,12 +29,18 @@ wtime = "N/A"
 weather: dict | None = None
 
 # -------------------------------
+# OPENWEATHER CONFIG
+# -------------------------------
+CITY = "Addicks"
+API_KEY = st.secrets["OPENWEATHER_KEY"]
+
+# -------------------------------
 # HEADER / COLUMNS
 # -------------------------------
 def before_call():
     col1, col2, col3, col4 = st.columns([3,3,3,3])
 
-    col1.markdown("#### This is a Header \nversion 3/9.05:08")
+    col1.markdown("#### This is a Header \nversion 3/9.18:08")
     col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
     col1.markdown("---")
     col1.markdown("ISO format")
@@ -84,8 +90,8 @@ def parse_weather(data):
     return {
         "time": wtime,
         "temp": data["main"]["temp"],
-        "temp_max": data["main"]["temp_max"],
-        "temp_min": data["main"]["temp_min"],
+        #"temp_max": data["main"]["temp_max"],
+        #"temp_min": data["main"]["temp_min"],
         "clouds": data["clouds"]["all"],
         "humidity": data["main"]["humidity"],
         "wind_speed": data["wind"]["speed"],
@@ -95,11 +101,7 @@ def parse_weather(data):
     }
 
 
-# -------------------------------
-# OPENWEATHER CONFIG
-# -------------------------------
-CITY = "Addicks"
-API_KEY = st.secrets["OPENWEATHER_KEY"]
+
 
 # -------------------------------
 # FETCH WEATHER
@@ -150,8 +152,8 @@ if st.session_state["photo"] == "done":
         col3.markdown(f"##### {weather['time']}")
         col3.markdown(f"Temperature")
         col3.markdown(f'##### {weather["temp"]} °F')
-        col3.markdown(f'##### {weather["temp_max"]} °F')
-        col3.markdown(f'##### {weather["temp_min"]} °F')
+        #col3.markdown(f'##### {weather["temp_max"]} °F')
+        #col3.markdown(f'##### {weather["temp_min"]} °F')
         col3.markdown(f"Cloud Cover")
         col3.markdown(f'##### {weather["clouds"]} %')
         col3.markdown(f"Wind Speed")
