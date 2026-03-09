@@ -98,7 +98,7 @@ def parse_weather(data):
 # -------------------------------
 # OPENWEATHER CONFIG
 # -------------------------------
-CITY = "Gulf Shores"
+CITY = "Addicks"
 API_KEY = st.secrets["OPENWEATHER_KEY"]
 
 # -------------------------------
