@@ -40,7 +40,7 @@ API_KEY = st.secrets["OPENWEATHER_KEY"]
 def before_call():
     col1, col2, col3, col4 = st.columns([3,3,3,3])
 
-    col1.markdown("#### This is a Header \nversion 3/9.18:08")
+    col1.markdown("#### This is a Header \nversion 3/9.18:50")
     col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
     col1.markdown("---")
     col1.markdown("ISO format")
@@ -149,21 +149,14 @@ if st.session_state["photo"] == "done":
     col3.text("Weather Data From openweathermap.org")
     if weather is not None:
         col3.markdown(f"Weather Time in {CITY}")
-        col3.markdown(f"##### {weather['time']}")
-        col3.markdown(f"Temperature")
-        col3.markdown(f'##### {weather["temp"]} °F')
-        #col3.markdown(f'##### {weather["temp_max"]} °F')
-        #col3.markdown(f'##### {weather["temp_min"]} °F')
-        col3.markdown(f"Cloud Cover")
-        col3.markdown(f'##### {weather["clouds"]} %')
-        col3.markdown(f"Wind Speed")
-        col3.markdown(f'##### {weather["wind_speed"]} MPH')
-        col3.markdown(f"Wind Direction")
-        col3.markdown(f'##### {weather["wind_dir"]} °')
-        col3.markdown(f"Latitude")
-        col3.markdown(f'##### {weather["lat"]}')
-        col3.markdown(f"Longitude")
-        col3.markdown(f'##### {weather["lon"]}')
+        col3.markdown(f"###### {weather['time']}")
+        col3.markdown(f"Temperature: {weather['temp']} °F")
+        col3.markdown(f"Humidity: {weather['humidity']} %")
+        col3.markdown(f"Cloud Cover: {weather['clouds']} %")
+        col3.markdown(f"Wind Speed: {weather['wind_speed']} MPH")
+        col3.markdown(f"Wind Direction: {weather['wind_dir']} °")
+        col3.markdown(f"Latitude: {weather['lat']}")
+        col3.markdown(f"Longitude: {weather['lon']}")
 
     # -------------------------------
     # TEXT INPUT
