@@ -1,56 +1,44 @@
 import streamlit as st
 import time
 import requests
-from datetime import datetime, timezone, timedelta
-#from datetime import datetime, timezone
+import base64
+from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
+
+#------------------------------
+# GLOBAL VARIABLES
+#------------------------------
+Version = '3/12 09.47'
+x = datetime.now(ZoneInfo("America/Chicago"))
 st.set_page_config(
-    page_title="4 Column Page",      # This goes in the browser tab
-    page_icon="🌤️",                  # This is the "favicon" in the tab
-    layout="wide"                    # Optional: uses the full screen width
+    page_title="4 Column Page",
+    page_icon="🌤️",
+    layout="wide"
 )
 
 # -------------------------------
-# TIME
-# -------------------------------
-x = datetime.now(ZoneInfo("America/Chicago"))
-
-# -------------------------------
-# WEATHER DEFAULTS
-# -------------------------------
-temp = 0
-cloud_cover = 0
-humidity = 0
-wind_speed = 0
-wind_dir = 0
-latitude = 0
-longitude = 0
-wtime = "N/A"
-weather: dict | None = None
-
-# -------------------------------
-# OPENWEATHER CONFIG
-# -------------------------------
-CITY = "Addicks"
-API_KEY = st.secrets["OPENWEATHER_KEY"]
-
-# -------------------------------
-# HEADER / COLUMNS
+# HEADER /DEFINE COLUMNS /COLUMN 1
 # -------------------------------
 def before_call():
+
     col1, col2, col3, col4 = st.columns([3,3,3,3])
 
-    col1.markdown("#### This is a Header \nversion 3/9.18:50")
+    col1.markdown("##### This is a Header ")
+    col1.markdown(f"Version {Version}")
     col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
     col1.markdown("---")
+
     col1.markdown("ISO format")
     col1.markdown(x.isoformat())
     col1.markdown(x)
     col1.markdown(x.year)
+
     col1.markdown(x.strftime("%B %d,%Y"))
     col1.markdown(x.strftime("%I:%M:%S %p"))
-    col1.markdown("You can even add a horizontal rule below \n\n---")
-    col1.markdown(":red[latest streamlit method below and it should be used]")
+
+    #col1.markdown("You can even add a horizontal rule below \n\n ---")
+    col1.markdown(" \n\n ---")
+    col1.markdown("Above is one way for horizontal rule below another")
     col1.divider()
 
     col1.markdown(":red[This text is red!]")
@@ -60,14 +48,29 @@ def before_call():
 
     return col1, col2, col3, col4
 
+#-----------------------------------
+#NUMBER OF TIMES CALLED WEATHER DATA
+#-----------------------------------
+def increment_counter():
+    try:
+        with open("weather_counter.txt", "r") as f:
+            count = int(f.read())
+    except (FileNotFoundError, ValueError):
+        count = 0
 
-col1, col2, col3, col4 = before_call()
+    count += 1
+
+    with open("weather_counter.txt","w") as f:
+        f.write(str(count))
+
+    return count
 
 # -------------------------------
 # WEATHER FUNCTION (CACHED)
 # -------------------------------
-@st.cache_data(ttl=300)
+@st.cache_data(ttl=10)
 def get_weather(city, api_key):
+    st.session_state.w_call_count = increment_counter()
 
     url = (
         "https://api.openweathermap.org/data/2.5/weather"
@@ -76,22 +79,24 @@ def get_weather(city, api_key):
 
     r = requests.get(url, timeout=5)
     r.raise_for_status()
+
     return r.json()
 
-
 # -------------------------------
-# WEATHER PARSER
+# WEATHER PARSER/SETUP PRINTING
 # -------------------------------
 def parse_weather(data):
-    wtime = datetime.fromtimestamp(data["dt"] + data["timezone"], tz=timezone.utc
+
+    w_time = datetime.fromtimestamp(
+        data["dt"] + data["timezone"],
+        tz=timezone.utc
     )
-    wtime = wtime.strftime("%Y-%m-%d %I:%M:%S %p")
+
+    w_time = w_time.strftime("%Y-%m-%d %I:%M:%S %p")
 
     return {
-        "time": wtime,
+        "time": w_time,
         "temp": data["main"]["temp"],
-        #"temp_max": data["main"]["temp_max"],
-        #"temp_min": data["main"]["temp_min"],
         "clouds": data["clouds"]["all"],
         "humidity": data["main"]["humidity"],
         "wind_speed": data["wind"]["speed"],
@@ -101,22 +106,47 @@ def parse_weather(data):
     }
 
 
+#-----------------------------
+# MAIN AREA
+#-----------------------------
+col1, col2, col3, col4 = before_call()
+
+# -------------------------------
+# SESSION STATE COUNTER
+# -------------------------------
+st.session_state.w_call_count = 10
+
+# -------------------------------
+# TIME
+# -------------------------------
+
+# -------------------------------
+# WEATHER DEFAULTS
+# -------------------------------
+weather: dict | None = None
+
+# -------------------------------
+# OPENWEATHER CONFIG
+# -------------------------------
+CITY = "Addicks"
+API_KEY = st.secrets["OPENWEATHER_KEY"]
 
 
 # -------------------------------
 # FETCH WEATHER
 # -------------------------------
 try:
+
     raw_weather = get_weather(CITY, API_KEY)
     weather = parse_weather(raw_weather)
 
 except Exception as e:
+
     st.warning(f"Weather service temporarily unavailable: {e}")
     weather = None
 
-
 # -------------------------------
-# SESSION STATE
+# PHOTO ACQUIRE
 # -------------------------------
 if "photo" not in st.session_state:
     st.session_state["photo"] = "not done"
@@ -126,8 +156,15 @@ def change_photo_state():
     st.session_state["photo"] = "done"
 
 
-# simulate upload trigger
-change_photo_state()
+uploaded_file = col2.file_uploader(
+    "Upload a TXT or PDF file",
+    type=["txt", "pdf"]
+)
+
+#camera_photo = col2.camera_input(
+#    "Take a photo",
+#    on_change=change_photo_state
+#)
 
 # -------------------------------
 # AFTER PHOTO UPLOAD
@@ -142,40 +179,68 @@ if st.session_state["photo"] == "done":
 
     col2.success("Photo uploaded successfully!")
 
-    # -------------------------------
-    # WEATHER DISPLAY
-    # -------------------------------
+# -------------------------------
+# WEATHER DISPLAY
+# -------------------------------
+col3.text("Weather Data From openweathermap.org")
 
-    col3.text("Weather Data From openweathermap.org")
-    if weather is not None:
-        col3.markdown(f"Weather Time in {CITY}")
-        col3.markdown(f"###### {weather['time']}")
-        col3.markdown(f"Temperature: {weather['temp']} °F")
-        col3.markdown(f"Humidity: {weather['humidity']} %")
-        col3.markdown(f"Cloud Cover: {weather['clouds']} %")
-        col3.markdown(f"Wind Speed: {weather['wind_speed']} MPH")
-        col3.markdown(f"Wind Direction: {weather['wind_dir']} °")
-        col3.markdown(f"Latitude: {weather['lat']}")
-        col3.markdown(f"Longitude: {weather['lon']}")
+col3.markdown(
+    f"Call Number: {st.session_state.w_call_count} Times"
+)
 
-    # -------------------------------
-    # TEXT INPUT
-    # -------------------------------
-    md3 = st.text_area("Enter in Column 3! :balloon:")
-    md4 = st.text_area("Enter in Column 4! :balloon:")
+if weather is not None:
 
-    col3.markdown(md3)
+    col3.markdown(f"""
+    **Weather in {CITY}**
 
-    col4.markdown(
-        "this is the fourth column 12345 67890 12345 67890 "
-        "12345 67890 12345 67890"
-    )
-    col4.markdown(md4)
+    Time: {weather['time']}
 
-    # -------------------------------
-    # EXPANDER
-    # -------------------------------
-    with st.expander("Click to read more"):
-        st.write(
-            "Hello! Here are more details on this topic that you were interested in."
-        )
+    Temperature: {weather['temp']} °F  
+    Humidity: {weather['humidity']} %  
+    Cloud Cover: {weather['clouds']} %  
+
+    Wind Speed: {weather['wind_speed']} MPH  
+    Wind Direction: {weather['wind_dir']} °  
+
+    Latitude: {weather['lat']}  
+    Longitude: {weather['lon']}
+    """)
+
+# -------------------------------
+# COLUMN 4 DISPLAY
+# -------------------------------
+col4.markdown(
+    "this is the fourth column 12345 67890 "
+    "12345 67890 12345 67890"
+)
+
+#-----------------------------
+# BELOW THE COLUMNS DISPLAY
+#-----------------------------
+
+md3 = st.text_area("Enter in Column 3! :balloon:")
+md4 = st.text_area("Enter in Column 4! :balloon:")
+
+col3.write(md3)
+col4.markdown(md4)
+
+# -------------------------------
+# EXPANDER CAN ADD INFORMATION
+# AND A FILE BELOW THE COLUMNS
+# -------------------------------
+import base64
+
+with st.expander("Click to read more"):
+
+    if uploaded_file is not None:
+
+        if uploaded_file.type == "application/pdf":
+
+            base64_pdf = base64.b64encode(uploaded_file.read()).decode("utf-8")
+            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="500"></iframe>'
+            st.markdown(pdf_display, unsafe_allow_html=True)
+
+        elif uploaded_file.type == "text/plain":
+
+            file_contents = uploaded_file.read().decode("utf-8")
+            st.text_area("Text File Contents", file_contents, height=300)
