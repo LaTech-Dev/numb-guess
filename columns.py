@@ -1,7 +1,8 @@
 import streamlit as st
+#from streamlit_pdf_viewer import pdf_viewer
 import time
 import requests
-import base64
+#import base64
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
@@ -228,7 +229,6 @@ col4.markdown(md4)
 # EXPANDER CAN ADD INFORMATION
 # AND A FILE BELOW THE COLUMNS
 # -------------------------------
-import base64
 
 with st.expander("Click to read more"):
 
@@ -236,9 +236,7 @@ with st.expander("Click to read more"):
 
         if uploaded_file.type == "application/pdf":
 
-            base64_pdf = base64.b64encode(uploaded_file.read()).decode("utf-8")
-            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" width="700" height="500"></iframe>'
-            st.markdown(pdf_display, unsafe_allow_html=True)
+            st.pdf(uploaded_file)
 
         elif uploaded_file.type == "text/plain":
 
