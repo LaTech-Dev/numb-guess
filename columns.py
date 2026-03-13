@@ -9,7 +9,7 @@ from zoneinfo import ZoneInfo
 #------------------------------
 # GLOBAL VARIABLES
 #------------------------------
-Version = '3/12 09.47'
+Version = '3/13 11.53'
 x = datetime.now(ZoneInfo("America/Chicago"))
 st.set_page_config(
     page_title="4 Column Page",
