@@ -1,15 +1,13 @@
 import streamlit as st
-#from streamlit_pdf_viewer import pdf_viewer
 import time
 import requests
-#import base64
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 
 #------------------------------
 # GLOBAL VARIABLES
 #------------------------------
-Version = '3/13 11.53'
+Version = '3/13 15.20'
 x = datetime.now(ZoneInfo("America/Chicago"))
 st.set_page_config(
     page_title="4 Column Page",
@@ -19,35 +17,16 @@ st.set_page_config(
 
 # -------------------------------
 # HEADER /DEFINE COLUMNS /COLUMN 1
+# COLUMN1 USES A DIFFERENT NAME
+# INSIDE THE FUNCTION
+# THAN OUTSIDE
 # -------------------------------
 def before_call():
 
-    col1, col2, col3, col4 = st.columns([3,3,3,3])
+    cl1, cl2, cl3, cl4 = st.columns([3,3,3,3])
 
-    col1.markdown("##### This is a Header ")
-    col1.markdown(f"Version {Version}")
-    col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
-    col1.markdown("---")
 
-    col1.markdown("ISO format")
-    col1.markdown(x.isoformat())
-    col1.markdown(x)
-    col1.markdown(x.year)
-
-    col1.markdown(x.strftime("%B %d,%Y"))
-    col1.markdown(x.strftime("%I:%M:%S %p"))
-
-    #col1.markdown("You can even add a horizontal rule below \n\n ---")
-    col1.markdown(" \n\n ---")
-    col1.markdown("Above is one way for horizontal rule below another")
-    col1.divider()
-
-    col1.markdown(":red[This text is red!]")
-    col1.markdown(":yellow[This text is yellow!]")
-    col1.markdown(":green[This text is green!]")
-    col1.markdown(":blue[This text is blue!]")
-
-    return col1, col2, col3, col4
+    return cl1, cl2, cl3, cl4
 
 #-----------------------------------
 #NUMBER OF TIMES CALLED WEATHER DATA
@@ -100,6 +79,7 @@ def parse_weather(data):
         "temp": data["main"]["temp"],
         "clouds": data["clouds"]["all"],
         "humidity": data["main"]["humidity"],
+        "pressure": data["main"]["pressure"],
         "wind_speed": data["wind"]["speed"],
         "wind_dir": data["wind"].get("deg", "N/A"),
         "lat": data["coord"]["lat"],
@@ -111,6 +91,28 @@ def parse_weather(data):
 # MAIN AREA
 #-----------------------------
 col1, col2, col3, col4 = before_call()
+col1.markdown("##### This is a Header ")
+col1.markdown(f"Version {Version}")
+col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
+col1.markdown("---")
+
+col1.markdown("ISO format")
+col1.markdown(x.isoformat())
+col1.markdown(x)
+col1.markdown(x.year)
+
+col1.markdown(x.strftime("%B %d,%Y"))
+col1.markdown(x.strftime("%I:%M:%S %p"))
+
+# col1.markdown("You can even add a horizontal rule below \n\n ---")
+col1.markdown(" \n\n ---")
+col1.markdown("Above is one way for horizontal rule below another")
+col1.divider()
+
+col1.markdown(":red[This text is red!]")
+col1.markdown(":yellow[This text is yellow!]")
+col1.markdown(":green[This text is green!]")
+col1.markdown(":blue[This text is blue!]")
 
 # -------------------------------
 # SESSION STATE COUNTER
@@ -159,7 +161,7 @@ def change_photo_state():
 
 uploaded_file = col2.file_uploader(
     "Upload a TXT or PDF file",
-    type=["txt", "pdf"]
+    type=["txt", "pdf", "png"]
 )
 
 #camera_photo = col2.camera_input(
@@ -190,7 +192,8 @@ col3.markdown(
 )
 
 if weather is not None:
-
+    pressure_hpa = float(weather.get("pressure", 0))
+    pressure_in_hg = round(pressure_hpa * 0.02953, 2)
     col3.markdown(f"""
     **Weather in {CITY}**
 
@@ -198,8 +201,11 @@ if weather is not None:
 
     Temperature: {weather['temp']} °F  
     Humidity: {weather['humidity']} %  
-    Cloud Cover: {weather['clouds']} %  
-
+    Cloud Cover: {weather['clouds']} % 
+     
+    Pressure: {weather['pressure']} hPa  
+    Pressure (inHg): {pressure_in_hg} inHg 
+     
     Wind Speed: {weather['wind_speed']} MPH  
     Wind Direction: {weather['wind_dir']} °  
 
@@ -230,13 +236,19 @@ col4.markdown(md4)
 # AND A FILE BELOW THE COLUMNS
 # -------------------------------
 
+#frame_height = st.slider("Adjust PDF Viewer Height", 200, 1000, 600)
+
 with st.expander("Click to read more"):
 
     if uploaded_file is not None:
 
         if uploaded_file.type == "application/pdf":
 
-            st.pdf(uploaded_file)
+            #st.pdf(uploaded_file, height=frame_height)
+            st.pdf(uploaded_file, height=800)
+
+        elif uploaded_file.type in ["image/png", "image/jpeg"]:
+            st.image(uploaded_file, caption="Uploaded Weather Image", use_container_width=True)
 
         elif uploaded_file.type == "text/plain":
 
