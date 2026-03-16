@@ -91,6 +91,10 @@ def parse_weather(data):
 # MAIN AREA
 #-----------------------------
 col1, col2, col3, col4 = before_call()
+
+#-----------------------------
+# COLUMN 1 LOAD
+#-----------------------------
 col1.markdown("##### This is a Header ")
 col1.markdown(f"Version {Version}")
 col1.markdown("Here :red[**red**] is some **bold** text and some *italics* text.")
@@ -100,13 +104,18 @@ col1.markdown("ISO format")
 col1.markdown(x.isoformat())
 col1.markdown(x)
 col1.markdown(x.year)
+# required to get spaces into date
+formated_date = x.strftime("%A,   %B %d,  %Y")
+# anything but text removes spaces
+col1.text(formated_date)
+# a better way to display is with .code
+col1.code(x.strftime("%A,    %B %d,  %Y"))
 
-col1.markdown(x.strftime("%B %d,%Y"))
 col1.markdown(x.strftime("%I:%M:%S %p"))
 
 # col1.markdown("You can even add a horizontal rule below \n\n ---")
 col1.markdown(" \n\n ---")
-col1.markdown("Above is one way for horizontal rule below another")
+col1.markdown("Above is one way for horizontal rule below is another")
 col1.divider()
 
 col1.markdown(":red[This text is red!]")
@@ -183,7 +192,7 @@ if st.session_state["photo"] == "done":
     col2.success("Photo uploaded successfully!")
 
 # -------------------------------
-# WEATHER DISPLAY
+# WEATHER DISPLAY IN COLUMN 3
 # -------------------------------
 col3.text("Weather Data From openweathermap.org")
 
@@ -214,7 +223,7 @@ if weather is not None:
     """)
 
 # -------------------------------
-# COLUMN 4 DISPLAY
+# COLUMN 4 LOAD
 # -------------------------------
 col4.markdown(
     "this is the fourth column 12345 67890 "
