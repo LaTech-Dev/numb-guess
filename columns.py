@@ -36,7 +36,7 @@ def increment_counter():
         with open("weather_counter.txt", "r") as f:
             count = int(f.read())
     except (FileNotFoundError, ValueError):
-        count = 0
+        count = 98
 
     count += 1
 
