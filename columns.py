@@ -160,36 +160,7 @@ except Exception as e:
 # -------------------------------
 # PHOTO ACQUIRE
 # -------------------------------
-if "photo" not in st.session_state:
-    st.session_state["photo"] = "not done"
 
-
-def change_photo_state():
-    st.session_state["photo"] = "done"
-
-
-uploaded_file = col2.file_uploader(
-    "Upload a TXT or PDF file",
-    type=["txt", "pdf", "png"]
-)
-
-#camera_photo = col2.camera_input(
-#    "Take a photo",
-#    on_change=change_photo_state
-#)
-
-# -------------------------------
-# AFTER PHOTO UPLOAD
-# -------------------------------
-if st.session_state["photo"] == "done":
-
-    progress_bar = col2.progress(0)
-
-    for perc_completed in range(100):
-        time.sleep(0.0005)
-        progress_bar.progress(perc_completed + 1)
-
-    col2.success("Photo uploaded successfully!")
 
 # -------------------------------
 # WEATHER DISPLAY IN COLUMN 3
@@ -247,19 +218,3 @@ col4.markdown(md4)
 
 #frame_height = st.slider("Adjust PDF Viewer Height", 200, 1000, 600)
 
-with st.expander("Click to read more"):
-
-    if uploaded_file is not None:
-
-        if uploaded_file.type == "application/pdf":
-
-            #st.pdf(uploaded_file, height=frame_height)
-            st.pdf(uploaded_file, height=800)
-
-        elif uploaded_file.type in ["image/png", "image/jpeg"]:
-            st.image(uploaded_file, caption="Uploaded Weather Image", use_container_width=True)
-
-        elif uploaded_file.type == "text/plain":
-
-            file_contents = uploaded_file.read().decode("utf-8")
-            st.text_area("Text File Contents", file_contents, height=300)
